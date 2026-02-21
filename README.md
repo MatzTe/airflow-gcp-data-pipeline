@@ -146,19 +146,6 @@ errors/invalid_rows_<hash>.csv
 
 ---
 
-## Future Improvements 💡
-
-Possible next steps:
-
-- Event-driven pipeline (instead of scheduled DAG)
-- Data quality monitoring
-- Logging dashboard
-- Partitioned datasets
-- BigQuery integration
-- CI/CD deployment
-
----
-
 ## Author
 
 Matías Terraza
