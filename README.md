@@ -1,62 +1,63 @@
-# Airflow GCP Data Pipeline
+# Airflow GCP Data Pipeline 🚀
 
-A cloud-based data pipeline that automatically processes CSV files uploaded to Google Cloud Storage using Apache Airflow.
+End-to-end data pipeline built with **Apache Airflow** and **Google Cloud Platform (GCS)**.
 
-This project demonstrates a real-world Data Engineering workflow including ingestion, validation, cleaning, and storage of processed data.
+This project processes raw CSV files uploaded to a cloud bucket, validates the data, and separates valid and invalid records automatically.
 
----
-
-## Project Overview
-
-The pipeline automatically detects new files uploaded to a cloud storage bucket and processes them through a modular Python data pipeline.
-
-Input files are uploaded to:
-
-raw/
-
-The pipeline then:
-
-1. Validates the data
-2. Cleans incorrect values
-3. Separates valid and invalid records
-4. Saves results back to the bucket
-
-Output is stored in:
-
-processed/  
-errors/
+It demonstrates key data engineering concepts:
+- Workflow orchestration with Airflow
+- Cloud storage pipelines
+- Data validation and cleaning
+- Idempotent processing using file hashing
+- Production-style project structure
 
 ---
 
-## Architecture
+## Architecture 🏗️
 
-The pipeline follows this flow:
+```mermaid
+flowchart LR
 
-User Upload CSV  
-        ↓  
-Google Cloud Storage (raw/)  
-        ↓  
-Apache Airflow DAG  
-        ↓  
-Python Data Pipeline  
-        ↓  
-Processed Data + Error Data  
-        ↓  
-Google Cloud Storage
+A[Upload CSV] --> B[GCS Bucket /raw]
+B --> C[Airflow DAG Trigger]
+C --> D[Download File]
+D --> E[Normalize Data]
+E --> F[Validate Rows]
 
----
+F -->|Valid rows| G[GCS /processed]
+F -->|Invalid rows| H[GCS /errors]
 
-## Technologies Used
+G --> I[Pipeline Metrics]
+H --> I
+```
 
-- Python
-- Apache Airflow
-- Google Cloud Platform
-- Google Cloud Storage
-- Pandas
+Pipeline flow:
+1. A file is uploaded to the **raw** folder in a GCS bucket
+2. Airflow detects the file
+3. The pipeline processes the dataset
+4. Clean data and invalid rows are stored separately
 
 ---
 
-## Project Structure
+## Idempotent Processing 🔁
+
+The pipeline uses **content hashing** to avoid processing the same file twice.
+
+Each uploaded file generates a unique hash:
+
+```
+users_cleaned_<file_hash>.csv
+invalid_rows_<file_hash>.csv
+```
+
+This ensures:
+- No duplicated processing
+- Safe re-runs
+- Reliable pipeline behavior
+
+---
+
+## Project Structure 📂
 
 ```
 airflow-gcp-data-pipeline/
@@ -80,116 +81,85 @@ airflow-gcp-data-pipeline/
 
 ---
 
-## How the Pipeline Works
+## How the Pipeline Works ⚙️
 
-### 1. File Upload
-A CSV file is uploaded to the cloud storage bucket:
+### 1. File Detection
+Airflow monitors the bucket for new files.
 
+### 2. Data Cleaning
+The pipeline standardizes:
+- column names
+- string formatting
+- data types
+
+### 3. Data Validation
+Rows are validated using business rules:
+- valid email
+- valid age
+- correct subscription tier
+- required schema
+
+### 4. Storage
+Outputs are saved into separate folders:
+
+```
+raw/
+processed/
+errors/
+```
+
+---
+
+## Example Pipeline Execution
+
+Upload a file:
+
+```
 raw/users_test.csv
+```
 
-### 2. Airflow Detection
-The DAG runs and detects files inside the raw folder.
+Outputs generated:
 
-### 3. Processing
-The pipeline:
-
-- Reads the file
-- Validates schema and data quality
-- Cleans incorrect values
-- Splits valid and invalid rows
-
-### 4. Output
-
-Valid records:
-
-processed/users_clean.csv
-
-Invalid records:
-
-errors/users_errors.csv
+```
+processed/users_cleaned_<hash>.csv
+errors/invalid_rows_<hash>.csv
+```
 
 ---
 
-## DAG Overview
+## Tech Stack 🧰
 
-The Airflow DAG is responsible for:
-
-- Monitoring the storage bucket
-- Triggering the pipeline
-- Running the processing logic
-- Logging execution
-
-Main file:
-
-dags/user_pipeline_dag.py
+- Apache Airflow
+- Google Cloud Storage (GCS)
+- Python
+- Pandas
 
 ---
 
-## Pipeline Modules
+## Key Engineering Concepts Demonstrated
 
-validation.py  
-Handles schema validation and data checks.
-
-cleaning.py  
-Standardizes and cleans the dataset.
-
-storage.py  
-Saves processed and error files to cloud storage.
-
-pipeline_runner.py  
-Coordinates the entire pipeline process.
-
-utils.py  
-Helper functions used across modules.
+- DAG-based orchestration
+- Cloud-native pipelines
+- Data validation frameworks
+- Idempotent ETL design
+- Modular pipeline architecture
 
 ---
 
-## Running the Pipeline
+## Future Improvements 💡
 
-1. Upload a CSV file to the raw folder in the bucket
-2. Airflow detects the file
-3. The DAG runs automatically
-4. Processed results appear in processed/ and errors/
+Possible next steps:
 
-You can monitor execution in the Airflow UI.
-
----
-
-## Example Use Case
-
-This pipeline simulates a common data engineering workflow where incoming datasets must be validated and cleaned before being used for analytics or machine learning.
-
----
-
-## What This Project Demonstrates
-
-- Data pipeline architecture
-- Workflow orchestration
-- Modular Python design
-- Cloud storage integration
-- Data validation strategies
-- Production-style project structure
-
----
-
-## Idempotent Pipeline Design
-
-This pipeline follows an idempotent processing strategy to ensure that files are not processed multiple times.
-
-Each input file is identified using a content hash. Before processing, the pipeline checks whether the file has already been processed by comparing hashes.
-
-This approach guarantees that:
-
-- The same file is not processed more than once
-- Re-running the DAG does not create duplicated outputs
-- Results remain consistent across executions
-- The pipeline can safely recover from failures
-
-The hash-based mechanism allows the pipeline to scale efficiently as new files are added to the storage bucket.
+- Event-driven pipeline (instead of scheduled DAG)
+- Data quality monitoring
+- Logging dashboard
+- Partitioned datasets
+- BigQuery integration
+- CI/CD deployment
 
 ---
 
 ## Author
 
-Matías Terraza  
-Data Analyst / Analytics Engineer
+Matías Terraza
+Data Analyst / Analytics Engineering
