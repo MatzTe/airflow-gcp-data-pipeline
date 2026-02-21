@@ -74,9 +74,6 @@ airflow-gcp-data-pipeline/
 ├── data_sample/
 │   └── users_test.csv
 │
-├── architecture/
-│   └── architecture_diagram.png
-│
 ├── requirements.txt
 └── README.md
 ```
@@ -175,20 +172,24 @@ This pipeline simulates a common data engineering workflow where incoming datase
 
 ---
 
-## Future Improvements
+## Idempotent Pipeline Design
 
-Possible next steps for this project:
+This pipeline follows an idempotent processing strategy to ensure that files are not processed multiple times.
 
-- Add BigQuery integration
-- Implement streaming ingestion
-- Add data quality metrics
-- Add automated testing
-- Implement CI/CD
-- Support multiple file formats
+Each input file is identified using a content hash. Before processing, the pipeline checks whether the file has already been processed by comparing hashes.
+
+This approach guarantees that:
+
+- The same file is not processed more than once
+- Re-running the DAG does not create duplicated outputs
+- Results remain consistent across executions
+- The pipeline can safely recover from failures
+
+The hash-based mechanism allows the pipeline to scale efficiently as new files are added to the storage bucket.
 
 ---
 
 ## Author
 
 Matías Terraza  
-Data Analyst / Data Engineer
+Data Analyst / Analytics Engineer
