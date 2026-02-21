@@ -1,60 +1,41 @@
-# User Data Pipeline with Airflow on GCP
+# Airflow GCP Data Pipeline
 
-## Overview
+A simple end-to-end data pipeline built with Apache Airflow and Google Cloud Storage.  
+The pipeline automatically processes CSV files uploaded to a GCS bucket, validates the data, cleans it, and stores the results in organized locations.
 
-This project implements a production-style data pipeline using Apache Airflow running on Google Cloud Composer.
-
-The pipeline automatically detects CSV files uploaded to a Google Cloud Storage bucket, processes the data, validates the schema, and stores clean and invalid records in separate locations.
-
-The goal of this project is to simulate a real-world data engineering pipeline with idempotent processing, data validation, and structured architecture.
+This project demonstrates orchestration, modular pipeline design, and basic data engineering best practices.
 
 ---
 
-## Architecture
+## Project Overview
 
-Pipeline flow:
+The pipeline works as follows:
 
-User uploads CSV → GCS bucket (raw/) → Airflow DAG → Data Processing → GCS (processed/ and errors/)
-
-Processing steps:
-
-1. A CSV file is uploaded to the raw folder
-2. Airflow detects the file
-3. The pipeline downloads the file
-4. Data is normalized
-5. Schema validation is applied
-6. Valid and invalid records are separated
-7. Results are stored back in the bucket
-8. Execution metrics are logged
-
----
-
-## Key Features
-
-Event-style pipeline with Airflow  
-Idempotent processing using file hashing  
-Schema validation with business rules  
-Data normalization and cleaning  
-Deduplication of records  
-Structured logging  
-Separation of valid and invalid data  
-Cloud-based architecture
+1. A CSV file is uploaded to the **raw** folder in a GCS bucket.
+2. Airflow triggers the DAG.
+3. The pipeline:
+   - Validates the data
+   - Cleans incorrect rows
+   - Separates valid and invalid records
+4. Processed data is stored back in the bucket.
 
 ---
 
 ## Tech Stack
 
-Python  
-Apache Airflow  
-Google Cloud Composer  
-Google Cloud Storage  
-Pandas
+- Apache Airflow
+- Python
+- Google Cloud Storage
+- Pandas
+- Docker (optional for deployment)
 
 ---
 
 ## Project Structure
 
+```
 airflow-gcp-data-pipeline/
+│
 ├── dags/
 │   └── user_pipeline_dag.py
 │
@@ -73,104 +54,111 @@ airflow-gcp-data-pipeline/
 │
 ├── requirements.txt
 └── README.md
+```
 
 ---
 
 ## How the Pipeline Works
 
-### Step 1 — File Upload
-
+### 1. File Upload
 A CSV file is uploaded to:
 
+```
 raw/users_test.csv
+```
 
-### Step 2 — Airflow Detection
+### 2. Airflow DAG Trigger
+Airflow detects the new file and runs the DAG:
 
-The Airflow DAG waits for the file to appear in the bucket.
+```
+user_pipeline_test
+```
 
-### Step 3 — Pipeline Execution
-
+### 3. Data Processing
 The pipeline performs:
 
-- Data loading
-- Data normalization
 - Schema validation
-- Record filtering
-- Deduplication
+- Data cleaning
+- Error detection
+- Logging
 
-### Step 4 — Output
+### 4. Output
 
-Clean data:
+Results are stored in:
 
-processed/users_cleaned_<hash>.csv
-
-Invalid records:
-
-errors/invalid_rows_<hash>.csv
-
-The hash ensures idempotent processing and avoids duplicate runs.
+```
+processed/
+errors/
+```
 
 ---
 
-## Example Input
+## Example Data Flow
 
-Example dataset:
+```
+Upload CSV → Airflow DAG → Validation → Cleaning → Storage
+```
 
-users_test.csv
-
-Columns:
-
-- user_id
-- name
-- email
-- signup_date
-- country
-- age
-- subscription_tier
+```
+raw/ → processing → processed/ + errors/
+```
 
 ---
 
-## Data Validation Rules
+## Installation
 
-The pipeline validates:
+Clone the repository:
 
-- Required schema columns
-- Email format
-- Valid subscription tiers
-- Positive age values
-- Non-null user identifiers
+```
+git clone https://github.com/your-username/airflow-gcp-data-pipeline.git
+cd airflow-gcp-data-pipeline
+```
 
-Invalid rows are automatically separated for traceability.
+Install dependencies:
+
+```
+pip install -r requirements.txt
+```
 
 ---
 
-## Why This Project
+## Running the Project
 
-This project was built to demonstrate practical data engineering concepts such as:
+1. Start Airflow
+2. Place the DAG inside the Airflow `dags/` folder
+3. Upload a CSV file to the bucket
+4. Trigger the DAG from the Airflow UI
 
-- Pipeline orchestration
-- Cloud storage integration
-- Data validation and cleaning
-- Idempotent processing
-- Scalable architecture design
+---
 
-It simulates how ingestion pipelines are implemented in production environments.
+## Example Use Case
+
+This project simulates a common real-world data engineering workflow:
+
+- Raw data ingestion
+- Automated validation
+- Data quality checks
+- Structured storage
+
+It can be extended to:
+
+- Data warehouses
+- Streaming pipelines
+- Machine learning pipelines
 
 ---
 
 ## Future Improvements
 
-- Automatic detection of new files in raw/
-- Processing multiple files dynamically
-- Pipeline monitoring and metrics
-- CI/CD integration
-- Data quality dashboard
+- Add CI/CD
+- Add data quality metrics
+- Implement monitoring
+- Add unit tests
+- Deploy with Terraform
 
 ---
 
 ## Author
 
-Matías Terraza
-
-Data Analyst / Data Engineering focused projects  
-Background in philosophy with a transition into data and machine learning.
+Matías Terraza  
+Data / Machine Learning Engineer
